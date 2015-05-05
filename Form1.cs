@@ -303,34 +303,30 @@ namespace ANALYTICS_KPI_FORMAPP
             return r;
         }
         public static string NormTable(string cmdstr)
-    {
-
-        DataTable dt = OraDt(cmdstr);
-        int MaxTarih=0;
-        string rv = "<table><tr><th></th><th>Değer (" + MaxTarih.ToString() + ")</th><th>Ortalama</th><th>St. Sapma</th><th>Trend</th></tr>";
-  
- 
-      MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
-            
- 
-        catch (Exception ex) {
-            rv = ex.ToString();
-
-        }
-
-        for (int i = 1; i < dt.Columns.Count; i++)
         {
-            string name = dt.Columns[i].ColumnName.ToString();
-            double[] s = Seri(dt, name);
-            double Deger = DegerValue(dt, name, MaxTarih);
-            double Ortalama = Math.Round(Mean(s), 2);
-            double StandartSapma = Math.Round(StDev(s), 2);
-            rv += "<tr><td>" + name + "</td><td>" + Deger + "</td><td>" + Ortalama.ToString() + "</td><td>" + StandartSapma.ToString() + "</td><td>"+Trend(Deger,Ortalama,StandartSapma)+"</td></tr>";
 
+            DataTable dt = OraDt(cmdstr);
+            int MaxTarih = 0;
+            string rv = "<table><tr><th></th><th>Değer (" + MaxTarih.ToString() + ")</th><th>Ortalama</th><th>St. Sapma</th><th>Trend</th></tr>";
+
+
+            MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
+
+
+
+            for (int i = 1; i < dt.Columns.Count; i++)
+            {
+                string name = dt.Columns[i].ColumnName.ToString();
+                double[] s = Seri(dt, name);
+                double Deger = DegerValue(dt, name, MaxTarih);
+                double Ortalama = Math.Round(Mean(s), 2);
+                double StandartSapma = Math.Round(StDev(s), 2);
+                rv += "<tr><td>" + name + "</td><td>" + Deger + "</td><td>" + Ortalama.ToString() + "</td><td>" + StandartSapma.ToString() + "</td><td>" + Trend(Deger, Ortalama, StandartSapma) + "</td></tr>";
+
+            }
+
+            return rv + "</table>";
         }
-
-        return rv + "</table>";
-    }
 
 
 
