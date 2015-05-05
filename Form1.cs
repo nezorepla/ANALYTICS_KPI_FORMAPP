@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,17 +14,17 @@ namespace ANALYTICS_KPI_FORMAPP
 {
     public partial class Form1 : Form
     {
-    
-        
+
+
         //lbl_series.Text = NormTable(dt);// StDev(y).ToString() + "--" + Mean(y).ToString();
- 
+
 
 
         public Form1()
         {
             InitializeComponent();
             Sifreler();
-            MultiLableChart(" Select * from ANALYTICS_KPI_BASIS_OS ", "_BASIS_OS","ÖDEME SÖZÜ ORANI");
+            MultiLableChart(" Select * from ANALYTICS_KPI_BASIS_OS ", "_BASIS_OS", "ÖDEME SÖZÜ ORANI");
             MultiLableChart(" Select * from ANALYTICS_KPI_BASIS_YY ", "_BASIS_YY", "YAPILANDIRMA ORANI");
             MultiLableChart(" Select * from ANALYTICS_KPI_BASIS_AE ", "_BASIS_AE", "AKSIYON ERTELEME ORANI");
             LineChartWithTrend(" Select * from ANALYTICS_KPI_RPC_SKOR ORDER BY ACTION_DT ", "_RPC_SKOR", "ILK SIRADA YUKLENEN TELEFONUNUN ULAŞMA SKORU ORTALAMASI");
@@ -42,7 +42,7 @@ namespace ANALYTICS_KPI_FORMAPP
         {
             RetTable = " ";
 
-            RetTable +=  NormTable("Select * from ANALYTICS_KPI_BASIS_OS")+"<hr>";
+            RetTable += NormTable("Select * from ANALYTICS_KPI_BASIS_OS") + "<hr>";
             //RetTable += NormTable("Select * from ANALYTICS_KPI_BASIS_YY") + "<hr>"; 
         }
         static void SendMail()
@@ -61,7 +61,7 @@ namespace ANALYTICS_KPI_FORMAPP
             conn.Close();
 
             // string path = localDestnDir + "\\DENEME.sql";
-        } 
+        }
 
         static void Sifreler()
         {
@@ -86,7 +86,7 @@ namespace ANALYTICS_KPI_FORMAPP
         }
 
 
-        public static  DataTable OraDt(string cmdstr)
+        public static DataTable OraDt(string cmdstr)
         {
             string constr = "Data Source=.;User Id=" + USR + ";Password=" + PASS + ";Integrated Security=no;";
 
@@ -109,7 +109,7 @@ namespace ANALYTICS_KPI_FORMAPP
         }
         private void LineChartWithTrend(string cmdstr, string Cnm, string baslik)
         {
-      
+
             DataTable dt = OraDt(cmdstr);
 
             //string[] x = new string[dt.Rows.Count];
@@ -130,7 +130,7 @@ namespace ANALYTICS_KPI_FORMAPP
 
 
             chart3.Legends.Add(new Legend() { Name = "Legend" });
-           chart3.Legends[0].Docking = Docking.Bottom;
+            chart3.Legends[0].Docking = Docking.Bottom;
             ChartArea chartArea = new ChartArea() { Name = "ChartArea" };
             //Remove X-axis grid lines
             // chartArea.AxisX.MajorGrid.LineWidth = 0;
@@ -138,7 +138,7 @@ namespace ANALYTICS_KPI_FORMAPP
             //chartArea.AxisY.MajorGrid.LineWidth = 0;
 
 
-           // YUZDE chartArea.AxisY.LabelStyle.Format = "{0;0}" + "%";
+            // YUZDE chartArea.AxisY.LabelStyle.Format = "{0;0}" + "%";
             //Chart Area Back Color
             chartArea.BackColor = Color.FromName("white");
             chart3.ChartAreas.Add(chartArea);
@@ -156,14 +156,14 @@ namespace ANALYTICS_KPI_FORMAPP
             {
                 double y = (double)PCL.Utility.DBtoMT.ToDouble(dr[1]);
                 series.Points.AddXY(dr["ACTION_DT"].ToString(), y);
-                 series.LegendText = dr.Table.Columns[1].ColumnName;
+                series.LegendText = dr.Table.Columns[1].ColumnName;
             }
 
             //series.Points.DataBindXY(new[] { "2001-2", "2002-2", "2003-1", "2004-1" }, new[] { 10, 20, 90, 15 });
             //series.Points.DataBindXY(x, y);
-       //     series.IsValueShownAsLabel = true;
+            //     series.IsValueShownAsLabel = true;
             //series.IsVisibleInLegend = false;
-         //YUZDE   series.LabelFormat = "{0;0}" + "%";
+            //YUZDE   series.LabelFormat = "{0;0}" + "%";
 
             chart3.Series.Add(series);
             //işe yarıyor  
@@ -174,7 +174,7 @@ namespace ANALYTICS_KPI_FORMAPP
             */
             // chart3.Series[0].XValueType = ChartValueType.DateTime;
             //chart3.ChartAreas[0].AxisX.LabelStyle.Format = "yyyy/MM/dd";
-      chart3.Series[0].Sort(PointSortOrder.Ascending, "X");
+            chart3.Series[0].Sort(PointSortOrder.Ascending, "X");
 
             //chart3.ChartAreas[0].AxisX.Interval = 1;
             //chart3.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Months;
@@ -206,13 +206,13 @@ namespace ANALYTICS_KPI_FORMAPP
             chart3.Titles.Add(baslik + " (" + name + " Tarihi Sonrası)");
             //chart3.Titles.Add(sira + ". Sırada \"Cevap Verildi\" Alınan Telefonların Trendi ( " + name + "  Tarihi Sonrası)");
             //chart3.ChartAreas[0].Area3DStyle.Enable3D = true;
-           // chart3.SaveImage(savePath + GUN + "_CHART_TREND" + sira + ".png", ChartImageFormat.Png);
+            // chart3.SaveImage(savePath + GUN + "_CHART_TREND" + sira + ".png", ChartImageFormat.Png);
             chart3.SaveImage(savePath + GUN + Cnm + ".png", ChartImageFormat.Png);
         }
-        public void MultiLableChart(string cmdstr, string Cnm,string baslik)
+        public void MultiLableChart(string cmdstr, string Cnm, string baslik)
         {
 
-         
+
             DataTable dt = OraDt(cmdstr);
 
 
@@ -262,47 +262,47 @@ namespace ANALYTICS_KPI_FORMAPP
             }
             chart3.ChartAreas[0].AxisX.LabelStyle.Angle = 45; // this works
 
-            chart3.Titles.Add(baslik+" (" + name + " Tarihi Sonrası)");
-          //  chart3.ChartAreas[0].Area3DStyle.Enable3D = true;
-            chart3.SaveImage(savePath + GUN + Cnm+".png", ChartImageFormat.Png);
+            chart3.Titles.Add(baslik + " (" + name + " Tarihi Sonrası)");
+            //  chart3.ChartAreas[0].Area3DStyle.Enable3D = true;
+            chart3.SaveImage(savePath + GUN + Cnm + ".png", ChartImageFormat.Png);
         }
 
-   
-    public static double[] Seri(DataTable dt, string Column)
-    {
-        double[] y = new double[dt.Rows.Count];
-        for (int i = 0; i < dt.Rows.Count; i++)
+
+        public static double[] Seri(DataTable dt, string Column)
         {
-            y[i] = PCL.Utility.DBtoMT.ToDouble(dt.Rows[i][Column]);
+            double[] y = new double[dt.Rows.Count];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                y[i] = PCL.Utility.DBtoMT.ToDouble(dt.Rows[i][Column]);
+            }
+            return y;
         }
-        return y;
-    }
-    public static int MaxValue(DataTable dt)
-    {
-        return dt.Rows[dt.Rows.Count - 1].Field<int>(0);
-
-    }
-    public static double DegerValue(DataTable dt, string Column, int Tarih)
-    {
-
-        double y = new double();
-        for (int i = 0; i < dt.Rows.Count; i++)
+        public static int MaxValue(DataTable dt)
         {
-            if (dt.Rows[i][0].ToString() == Tarih.ToString())
-                y = PCL.Utility.DBtoMT.ToDouble(dt.Rows[i][Column]);
+            return dt.Rows[dt.Rows.Count - 1].Field<int>(0);
+
         }
-        return y;
-    }
-    public static string Trend(double v, double o, double s)
-    {
-        string r = "0";
-        if (v > o + s)
-            r = "2";
-        if (v < o - s)
-            r = "1";
-        return r;
-    }
-    public static string NormTable(string cmdstr)
+        public static double DegerValue(DataTable dt, string Column, int Tarih)
+        {
+
+            double y = new double();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                if (dt.Rows[i][0].ToString() == Tarih.ToString())
+                    y = PCL.Utility.DBtoMT.ToDouble(dt.Rows[i][Column]);
+            }
+            return y;
+        }
+        public static string Trend(double v, double o, double s)
+        {
+            string r = "0";
+            if (v > o + s)
+                r = "2";
+            if (v < o - s)
+                r = "1";
+            return r;
+        }
+        public static string NormTable(string cmdstr)
     {
 
         DataTable dt = OraDt(cmdstr);
@@ -336,58 +336,57 @@ namespace ANALYTICS_KPI_FORMAPP
 
 
 
-    /// <summary>
-    /// Calculates the mean of an array of values
-    /// </summary>
-    /// <param name="v">the array of values to calculate their mean</param>
-    /// <returns>The mean of the array of values</returns>
-    public static double Mean(double[] v)
-    {
-        double sum = 0.0;
-
-        for (int i = 0; i < v.Length; i++)
+        /// <summary>
+        /// Calculates the mean of an array of values
+        /// </summary>
+        /// <param name="v">the array of values to calculate their mean</param>
+        /// <returns>The mean of the array of values</returns>
+        public static double Mean(double[] v)
         {
-            sum += v[i];
+            double sum = 0.0;
+
+            for (int i = 0; i < v.Length; i++)
+            {
+                sum += v[i];
+            }
+
+            return sum / v.Length;
         }
 
-        return sum / v.Length;
-    }
-
-    /// <summary>
-    /// Calculates the variance of an array of values
-    /// </summary>
-    /// <param name="v">the array of values to calculate their variance</param>
-    /// <returns>The variance of the array of values</returns>
-    public static double Variance(double[] v)
-    {
-        double mean = Mean(v);
-        double sum = 0.0;
-
-        for (int i = 0; i < v.Length; i++)
+        /// <summary>
+        /// Calculates the variance of an array of values
+        /// </summary>
+        /// <param name="v">the array of values to calculate their variance</param>
+        /// <returns>The variance of the array of values</returns>
+        public static double Variance(double[] v)
         {
-            sum += (v[i] - mean) * (v[i] - mean);
+            double mean = Mean(v);
+            double sum = 0.0;
+
+            for (int i = 0; i < v.Length; i++)
+            {
+                sum += (v[i] - mean) * (v[i] - mean);
+            }
+
+            int denom = v.Length - 1;
+            if (v.Length <= 1)
+                denom = v.Length;
+
+            return sum / denom;
         }
 
-        int denom = v.Length - 1;
-        if (v.Length <= 1)
-            denom = v.Length;
-
-        return sum / denom;
-    }
-
-    /// <summary>
-    /// Calculates the standard deviation of an array of values
-    /// </summary>
-    /// <param name="v">the array of values to calculate their standard deviation</param>
-    /// <returns>The standard deviation of the array of values</returns>
-    public static double StDev(double[] v)
-    {
-        return Math.Sqrt(Variance(v));
-    }
+        /// <summary>
+        /// Calculates the standard deviation of an array of values
+        /// </summary>
+        /// <param name="v">the array of values to calculate their standard deviation</param>
+        /// <returns>The standard deviation of the array of values</returns>
+        public static double StDev(double[] v)
+        {
+            return Math.Sqrt(Variance(v));
+        }
 
 
 
 
     }
 }
-
