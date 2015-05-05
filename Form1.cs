@@ -49,7 +49,7 @@ namespace ANALYTICS_KPI_FORMAPP
         {
 
             //Bağlantımı oluşturuyorum
-            SqlConnection conn = new SqlConnection("Data Source=KRDPRDGEN01YENI;Initial Catalog=CCOps;User ID=CollUser;Password=Coll123456;");
+            SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=.;User ID=.;Password=.;");
             //Komutumu yazıyorum.
             SqlCommand comm = new SqlCommand(@"EXEC  ANALYTICS_KPI_SP_FIN '" + RetTable + "','" + GUN + "'", conn);
             //Bağlantımı açıyorum.
@@ -67,7 +67,7 @@ namespace ANALYTICS_KPI_FORMAPP
         {
             USR = "A25318";
             //Bağlantımı oluşturuyorum
-            SqlConnection conn = new SqlConnection("Data Source=KRDPRDGEN01;Initial Catalog=CCOps;User ID=CollUser;Password=Coll123456;");
+            SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=.;User ID=.;Password=.;");
             //Komutumu yazıyorum.
             SqlCommand comm = new SqlCommand(@"  select  ConfiguredValue    FROM [CCOps].[dbo].[SSIS Configurations]   where [PackagePath]='\Package.Connections[edw.finansbank.com.tr.A25318].Properties[Password]' and [ConfigurationFilter]='IVNEOD'", conn);
             //Bağlantımı açıyorum.
@@ -88,7 +88,7 @@ namespace ANALYTICS_KPI_FORMAPP
 
         public static  DataTable OraDt(string cmdstr)
         {
-            string constr = "Data Source=edw.finansbank.com.tr;User Id=" + USR + ";Password=" + PASS + ";Integrated Security=no;";
+            string constr = "Data Source=.;User Id=" + USR + ";Password=" + PASS + ";Integrated Security=no;";
 
 
             // Create the adapter with the selectCommand txt and the
