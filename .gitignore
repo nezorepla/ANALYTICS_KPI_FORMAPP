@@ -1,6 +1,6 @@
 *.suo
 *.user
-obj/
+Debug/
 _NCrunch*/
 packages/
 *.ncrunch*
