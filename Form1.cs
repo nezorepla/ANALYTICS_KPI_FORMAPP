@@ -19,6 +19,11 @@ namespace ANALYTICS_KPI_FORMAPP
         //lbl_series.Text = NormTable(dt);// StDev(y).ToString() + "--" + Mean(y).ToString();
 
 
+        private static string GUN = DateTime.Now.ToString("yyyyMMdd");
+        private static string PASS;
+        private static string USR;
+        public static string savePath = @"\\btprdout01\output\OUTPUT\Perakende\COLLECTION\ANALYTICS_KPI\";
+        public static string RetTable = "";
 
         public Form1()
         {
@@ -29,84 +34,13 @@ namespace ANALYTICS_KPI_FORMAPP
             MultiLableChart(" Select * from ANALYTICS_KPI_BASIS_AE ", "_BASIS_AE", "AKSIYON ERTELEME ORANI");
             LineChartWithTrend(" Select * from ANALYTICS_KPI_RPC_SKOR ORDER BY ACTION_DT ", "_RPC_SKOR", "ILK SIRADA YUKLENEN TELEFONUNUN ULAŞMA SKORU ORTALAMASI");
 
-            ReturnTable();
+           
             SendMail();
         }
-        private static string GUN = DateTime.Now.ToString("yyyyMMdd");
-        private static string PASS;
-        private static string USR;
-        public static string savePath = @"\\btprdout01\output\OUTPUT\Perakende\COLLECTION\ANALYTICS_KPI\";
-        public static string RetTable = "";
 
-        public void ReturnTable()
-        {
-            RetTable = " ";
-
-            RetTable += NormTable("Select * from ANALYTICS_KPI_BASIS_OS") + "<hr>";
-            //RetTable += NormTable("Select * from ANALYTICS_KPI_BASIS_YY") + "<hr>"; 
-        }
-        static void SendMail()
-        {
-
-            //Bağlantımı oluşturuyorum
-            SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=.;User ID=.;Password=.;");
-            //Komutumu yazıyorum.
-            SqlCommand comm = new SqlCommand(@"EXEC  ANALYTICS_KPI_SP_FIN '" + RetTable + "','" + GUN + "'", conn);
-            //Bağlantımı açıyorum.
-            conn.Open();
-            //SqlDataReader nesnem..
-            comm.ExecuteNonQuery();
+ 
 
 
-            conn.Close();
-
-            // string path = localDestnDir + "\\DENEME.sql";
-        }
-
-        static void Sifreler()
-        {
-            USR = "A25318";
-            //Bağlantımı oluşturuyorum
-            SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=.;User ID=.;Password=.;");
-            //Komutumu yazıyorum.
-            SqlCommand comm = new SqlCommand(@"  select  ConfiguredValue    FROM [CCOps].[dbo].[SSIS Configurations]   where [PackagePath]='\Package.Connections[edw.finansbank.com.tr.A25318].Properties[Password]' and [ConfigurationFilter]='IVNEOD'", conn);
-            //Bağlantımı açıyorum.
-            conn.Open();
-            //SqlDataReader nesnem..
-            SqlDataReader dr = comm.ExecuteReader();
-            while (dr.Read())
-            {
-                PASS = dr["ConfiguredValue"].ToString().Trim();
-            }
-            //sqlDataReader ve SqlConnection kapatılıyor.
-            dr.Close();
-            conn.Close();
-
-            // string path = localDestnDir + "\\DENEME.sql";
-        }
-
-
-        public static DataTable OraDt(string cmdstr)
-        {
-            string constr = "Data Source=.;User Id=" + USR + ";Password=" + PASS + ";Integrated Security=no;";
-
-
-            // Create the adapter with the selectCommand txt and the
-            // connection string
-            OracleDataAdapter adapter = new OracleDataAdapter(cmdstr, constr);
-
-            // Create the builder for the adapter to automatically generate
-            // the Command when needed
-            OracleCommandBuilder builder = new OracleCommandBuilder(adapter);
-
-            // Create and fill the DataSet using the EMP
-            DataSet dataset = new DataSet();
-            adapter.Fill(dataset, "EMP");
-
-            // Get the EMP table from the dataset
-            DataTable dt = dataset.Tables["EMP"];
-            return dt;
-        }
         private void LineChartWithTrend(string cmdstr, string Cnm, string baslik)
         {
 
@@ -207,22 +141,20 @@ namespace ANALYTICS_KPI_FORMAPP
             //chart3.Titles.Add(sira + ". Sırada \"Cevap Verildi\" Alınan Telefonların Trendi ( " + name + "  Tarihi Sonrası)");
             //chart3.ChartAreas[0].Area3DStyle.Enable3D = true;
             // chart3.SaveImage(savePath + GUN + "_CHART_TREND" + sira + ".png", ChartImageFormat.Png);
-            chart3.SaveImage(savePath + GUN + Cnm + ".png", ChartImageFormat.Png);
+
+            string file = savePath + GUN + Cnm + ".png";
+            chart3.SaveImage(file, ChartImageFormat.Png);
+
+            RetTable += NormTable(dt, file, baslik);
         }
         public void MultiLableChart(string cmdstr, string Cnm, string baslik)
         {
-
-
             DataTable dt = OraDt(cmdstr);
-
-
-
-
             Chart chart3 = new Chart()
-            {
-                Width = 1200,
-                Height = 300
-            };
+        {
+            Width = 1200,
+            Height = 300
+        };
             // chart3.
 
 
@@ -264,10 +196,97 @@ namespace ANALYTICS_KPI_FORMAPP
 
             chart3.Titles.Add(baslik + " (" + name + " Tarihi Sonrası)");
             //  chart3.ChartAreas[0].Area3DStyle.Enable3D = true;
-            chart3.SaveImage(savePath + GUN + Cnm + ".png", ChartImageFormat.Png);
+            string file = savePath + GUN + Cnm + ".png";
+            chart3.SaveImage(file, ChartImageFormat.Png);
+
+            RetTable += NormTable(dt, file, baslik);
         }
 
+        public static string NormTable(DataTable dt, string file, string baslik)
+        {
 
+            //     DataTable dt = OraDt(cmdstr);
+            int MaxTarih = 0;
+            string rv = "<h3>" + baslik + "</h3><table><tr><td><table><tr><th></th><th>Değer (" + MaxTarih.ToString() + ")</th><th>Ortalama</th><th>St. Sapma</th><th>Trend</th></tr>";
+
+
+            MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
+
+
+
+            for (int i = 1; i < dt.Columns.Count; i++)
+            {
+                string name = dt.Columns[i].ColumnName.ToString();
+                double[] s = Seri(dt, name);
+                double Deger = DegerValue(dt, name, MaxTarih);
+                double Ortalama = Math.Round(Mean(s), 2);
+                double StandartSapma = Math.Round(StDev(s), 2);
+                rv += "<tr><td>" + name + "</td><td>" + Deger + "</td><td>" + Ortalama.ToString() + "</td><td>" + StandartSapma.ToString() + "</td><td>" + Trend(Deger, Ortalama, StandartSapma) + "</td></tr>";
+
+            }
+
+            return rv + "</table></td><td><img src=\"" + file + "\"></td></tr></table>";
+        }
+
+        static void SendMail()
+        {
+
+            //Bağlantımı oluşturuyorum
+            SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=.;User ID=.;Password=.;");
+            //Komutumu yazıyorum.
+            SqlCommand comm = new SqlCommand(@"EXEC  ANALYTICS_KPI_SP_FIN '" + RetTable + "','" + GUN + "'", conn);
+            //Bağlantımı açıyorum.
+            conn.Open();
+            //SqlDataReader nesnem..
+            comm.ExecuteNonQuery();
+
+
+            conn.Close();
+
+            // string path = localDestnDir + "\\DENEME.sql";
+        }
+        static void Sifreler()
+        {
+            USR = "A25318";
+            //Bağlantımı oluşturuyorum
+            SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=.;User ID=.;Password=.;");
+            //Komutumu yazıyorum.
+            SqlCommand comm = new SqlCommand(@"  select  ConfiguredValue    FROM [CCOps].[dbo].[SSIS Configurations]   where [PackagePath]='\Package.Connections[edw.finansbank.com.tr.A25318].Properties[Password]' and [ConfigurationFilter]='IVNEOD'", conn);
+            //Bağlantımı açıyorum.
+            conn.Open();
+            //SqlDataReader nesnem..
+            SqlDataReader dr = comm.ExecuteReader();
+            while (dr.Read())
+            {
+                PASS = dr["ConfiguredValue"].ToString().Trim();
+            }
+            //sqlDataReader ve SqlConnection kapatılıyor.
+            dr.Close();
+            conn.Close();
+
+            // string path = localDestnDir + "\\DENEME.sql";
+        }
+        public static DataTable OraDt(string cmdstr)
+        {
+            string constr = "Data Source=.;User Id=" + USR + ";Password=" + PASS + ";Integrated Security=no;";
+
+
+            // Create the adapter with the selectCommand txt and the
+            // connection string
+            OracleDataAdapter adapter = new OracleDataAdapter(cmdstr, constr);
+
+            // Create the builder for the adapter to automatically generate
+            // the Command when needed
+            OracleCommandBuilder builder = new OracleCommandBuilder(adapter);
+
+            // Create and fill the DataSet using the EMP
+            DataSet dataset = new DataSet();
+            adapter.Fill(dataset, "EMP");
+
+            // Get the EMP table from the dataset
+            DataTable dt = dataset.Tables["EMP"];
+            return dt;
+        }
         public static double[] Seri(DataTable dt, string Column)
         {
             double[] y = new double[dt.Rows.Count];
@@ -280,6 +299,8 @@ namespace ANALYTICS_KPI_FORMAPP
         public static int MaxValue(DataTable dt)
         {
             return dt.Rows[dt.Rows.Count - 1].Field<int>(0);
+
+
 
         }
         public static double DegerValue(DataTable dt, string Column, int Tarih)
@@ -302,36 +323,6 @@ namespace ANALYTICS_KPI_FORMAPP
                 r = "1";
             return r;
         }
-        public static string NormTable(string cmdstr)
-        {
-
-            DataTable dt = OraDt(cmdstr);
-            int MaxTarih = 0;
-            string rv = "<table><tr><th></th><th>Değer (" + MaxTarih.ToString() + ")</th><th>Ortalama</th><th>St. Sapma</th><th>Trend</th></tr>";
-
-
-            MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
-
-
-
-            for (int i = 1; i < dt.Columns.Count; i++)
-            {
-                string name = dt.Columns[i].ColumnName.ToString();
-                double[] s = Seri(dt, name);
-                double Deger = DegerValue(dt, name, MaxTarih);
-                double Ortalama = Math.Round(Mean(s), 2);
-                double StandartSapma = Math.Round(StDev(s), 2);
-                rv += "<tr><td>" + name + "</td><td>" + Deger + "</td><td>" + Ortalama.ToString() + "</td><td>" + StandartSapma.ToString() + "</td><td>" + Trend(Deger, Ortalama, StandartSapma) + "</td></tr>";
-
-            }
-
-            return rv + "</table>";
-        }
-
-
-
-
-
         /// <summary>
         /// Calculates the mean of an array of values
         /// </summary>
@@ -348,7 +339,6 @@ namespace ANALYTICS_KPI_FORMAPP
 
             return sum / v.Length;
         }
-
         /// <summary>
         /// Calculates the variance of an array of values
         /// </summary>
@@ -370,7 +360,6 @@ namespace ANALYTICS_KPI_FORMAPP
 
             return sum / denom;
         }
-
         /// <summary>
         /// Calculates the standard deviation of an array of values
         /// </summary>
