@@ -89,7 +89,7 @@ namespace ANALYTICS_KPI_FORMAPP
             foreach (DataRow dr in dt.Rows)
             {
                 double y = (double)PCL.Utility.DBtoMT.ToDouble(dr[1]);
-                series.Points.AddXY(dr["ACTION_DT"].ToString(), y);
+                series.Points.AddXY(dr[0].ToString(), y);
                 series.LegendText = dr.Table.Columns[1].ColumnName;
             }
 
@@ -151,10 +151,10 @@ namespace ANALYTICS_KPI_FORMAPP
         {
             DataTable dt = OraDt(cmdstr);
             Chart chart3 = new Chart()
-        {
-            Width = 1200,
-            Height = 300
-        };
+            {
+                Width = 1200,
+                Height = 300
+            };
             // chart3.
 
 
@@ -206,12 +206,18 @@ namespace ANALYTICS_KPI_FORMAPP
         {
 
             //     DataTable dt = OraDt(cmdstr);
-            int MaxTarih = 0;
-            string rv = "<h3>" + baslik + "</h3><table><tr><td><table><tr><th></th><th>Değer (" + MaxTarih.ToString() + ")</th><th>Ortalama</th><th>St. Sapma</th><th>Trend</th></tr>";
+            int MaxTarih=0 ;
+            try
+            {
 
-
-            MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
-
+                MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
+            }
+            catch
+                //
+            {
+                MaxTarih = Convert.ToInt32(dt.Compute("max(ACTION_DT)", string.Empty));
+            }
+            string rv = "<h3>" + baslik + "</h3><table><tr><td><table class=\"NormTable\"><tr><th></th><th>Değer (" + MaxTarih.ToString() + ")</th><th>Ay Ortalaması</th><th>6 Aylık Ortalama</th><th>St. Sapma</th><th>Trend</th></tr>";
 
 
             for (int i = 1; i < dt.Columns.Count; i++)
@@ -219,13 +225,30 @@ namespace ANALYTICS_KPI_FORMAPP
                 string name = dt.Columns[i].ColumnName.ToString();
                 double[] s = Seri(dt, name);
                 double Deger = DegerValue(dt, name, MaxTarih);
+                double DegerAylik = Math.Round(DegerValueAylik(dt, name, MaxTarih), 2);
                 double Ortalama = Math.Round(Mean(s), 2);
                 double StandartSapma = Math.Round(StDev(s), 2);
-                rv += "<tr><td>" + name + "</td><td>" + Deger + "</td><td>" + Ortalama.ToString() + "</td><td>" + StandartSapma.ToString() + "</td><td>" + Trend(Deger, Ortalama, StandartSapma) + "</td></tr>";
+                rv += "<tr><td>" + name + "</td><td>" + Deger + "</td><td>" + DegerAylik + "</td><td>" + Ortalama.ToString() + "</td><td>" + StandartSapma.ToString() + "</td><td><img width=\"12\" height=\"12\" src=\"" + savePath + "trend" + Trend(Deger, Ortalama, StandartSapma) + ".png\"></td></tr>";
 
             }
 
             return rv + "</table></td><td><img src=\"" + file + "\"></td></tr></table>";
+        }
+        public static double DegerValueAylik(DataTable dt, string Column, int Tarih)
+        {
+            string newDt= Tarih.ToString().Substring(0, 6);
+            double y = new double();
+            y = 0;
+            double X=0;
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                if (dt.Rows[i][0].ToString().Substring(0, 6) == newDt)
+                {
+                    y += PCL.Utility.DBtoMT.ToDouble(dt.Rows[i][Column]);
+                    X++;
+                }
+            }
+            return y /X  ;
         }
 
         static void SendMail()
