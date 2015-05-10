@@ -34,11 +34,11 @@ namespace ANALYTICS_KPI_FORMAPP
             MultiLableChart(" Select * from ANALYTICS_KPI_BASIS_AE ", "_BASIS_AE", "AKSIYON ERTELEME ORANI");
             LineChartWithTrend(" Select * from ANALYTICS_KPI_RPC_SKOR ORDER BY ACTION_DT ", "_RPC_SKOR", "ILK SIRADA YUKLENEN TELEFONUNUN ULAŞMA SKORU ORTALAMASI");
 
-           
+
             SendMail();
         }
 
- 
+
 
 
         private void LineChartWithTrend(string cmdstr, string Cnm, string baslik)
@@ -202,18 +202,104 @@ namespace ANALYTICS_KPI_FORMAPP
             RetTable += NormTable(dt, file, baslik);
         }
 
-        public static string NormTable(DataTable dt, string file, string baslik)
+        public static string NormTables(DataTable dt, string file, string baslik)
         {
 
             //     DataTable dt = OraDt(cmdstr);
-            int MaxTarih=0 ;
+            int MaxTarih = 0;
             try
             {
 
                 MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
             }
             catch
-                //
+            //
+            {
+                MaxTarih = Convert.ToInt32(dt.Compute("max(ACTION_DT)", string.Empty));
+            }
+
+            string rb = "<table class=\"NormTable\"><tr><th>Ekip</th>";
+            //"<th>Değer (" + MaxTarih.ToString() + ")</th><th>Ay Ortalaması</th><th>6 Aylık Ortalama</th><th>St. Sapma</th><th>Trend</th></tr>";
+            //var distinctNames = (from row in DataTable.AsEnumerable()
+            //                     select row.Field<string>("Name")).Distinct();
+
+            //foreach (var name in distinctNames) { Console.WriteLine(name); }
+
+            string rv = "";
+            DataView view = new DataView(dt);
+            DataTable distinctValues = view.ToTable(true, "GGS_BAND");
+            
+            for (int n = 0; n < distinctValues.Rows.Count; n++)
+            {
+                string distinctName = distinctValues.Rows[n][0].ToString();
+                rb += "<th>" + distinctName + "</th>";
+                for (int i = 2; i < dt.Columns.Count; i++)
+                {
+                    rv+="<tr>";
+                    string Column = dt.Columns[i].ColumnName.ToString();
+                    double[] s = Seris(dt, Column, distinctName);
+                    double Deger = DegerValues(dt, Column, MaxTarih, distinctName);
+                    //double DegerAylik = Math.Round(DegerValueAylik(dt, Column, MaxTarih), 2);
+                    double Ortalama = Math.Round(Mean(s), 2);
+                    double StandartSapma = Math.Round(StDev(s), 2);
+                    rv += "<td>" + Column + "</td><td>" + Deger + "</td><td>" + DegerAylik + "</td><td>" + Ortalama.ToString() + "</td><td>" + StandartSapma.ToString() + "</td><td><img width=\"12\" height=\"12\" src=\"" + savePath + "trend" + Trend(Deger, Ortalama, StandartSapma) + ".png\"></td></tr>";
+
+                }
+
+            }
+
+            //rb+"</tr>"
+
+    return rv + "</table></td><td><img src=\"" + file + "\"></td></tr></table>";
+        }
+
+//ok
+        public static double[] Seris(DataTable dt, string Column, string distinctName)
+        {
+            int Y = 0;
+            int X = 0;
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                if (dt.Rows[i][1].ToString() == distinctName)
+                    Y++;
+            }
+
+            double[] y = new double[Y];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                if (dt.Rows[i][1].ToString() == distinctName)
+                {
+                    X++;
+                    y[X] = PCL.Utility.DBtoMT.ToDouble(dt.Rows[i][Column]);
+                }
+            }
+            return y;
+        }
+        public static double DegerValues(DataTable dt, string Column, int Tarih, string distinctName)
+        {
+
+            double y = new double();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                if (dt.Rows[i][0].ToString() == Tarih.ToString() && dt.Rows[i][1].ToString() == distinctName)
+                    y = PCL.Utility.DBtoMT.ToDouble(dt.Rows[i][Column]);
+            }
+            return y;
+        }  
+        
+        public static string NormTable(DataTable dt, string file, string baslik)
+        {
+
+            //     DataTable dt = OraDt(cmdstr);
+            int MaxTarih = 0;
+            try
+            {
+
+                MaxTarih = Convert.ToInt32(dt.Compute("max(Tarih)", string.Empty));
+            }
+            catch
+            //
             {
                 MaxTarih = Convert.ToInt32(dt.Compute("max(ACTION_DT)", string.Empty));
             }
@@ -236,10 +322,10 @@ namespace ANALYTICS_KPI_FORMAPP
         }
         public static double DegerValueAylik(DataTable dt, string Column, int Tarih)
         {
-            string newDt= Tarih.ToString().Substring(0, 6);
+            string newDt = Tarih.ToString().Substring(0, 6);
             double y = new double();
             y = 0;
-            double X=0;
+            double X = 0;
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 if (dt.Rows[i][0].ToString().Substring(0, 6) == newDt)
@@ -248,7 +334,7 @@ namespace ANALYTICS_KPI_FORMAPP
                     X++;
                 }
             }
-            return y /X  ;
+            return y / X;
         }
 
         static void SendMail()
