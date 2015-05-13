@@ -90,6 +90,7 @@ namespace ANALYTICS_KPI_FORMAPP
             {
                 double y = (double)PCL.Utility.DBtoMT.ToDouble(dr[1]);
                 series.Points.AddXY(dr[0].ToString(), y);
+                series.YAxisType = AxisType.Primary;
                 series.LegendText = dr.Table.Columns[1].ColumnName;
             }
 
