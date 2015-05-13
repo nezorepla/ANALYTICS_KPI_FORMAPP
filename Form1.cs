@@ -103,6 +103,7 @@ namespace ANALYTICS_KPI_FORMAPP
             chart3.Series.Add(series);
             //işe yarıyor  
             chart3.ChartAreas[0].AxisX.LabelStyle.Angle = 45; // this works
+            chartCheck.ChartAreas[0].AxisX.IntervalType =10;
             /*chart3.ChartAreas[0].AxisX.IsLabelAutoFit = true;
             chart3.ChartAreas[0].AxisX.LabelAutoFitStyle = LabelAutoFitStyles.LabelsAngleStep30;
             chart3.ChartAreas[0].AxisX.LabelStyle.Enabled = true;
