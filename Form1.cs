@@ -506,7 +506,7 @@ namespace ANALYTICS_KPI_FORMAPP
             //Bağlantımı oluşturuyorum
             SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=*;User ID=*;Password=*;");
             //Komutumu yazıyorum.
-            SqlCommand comm = new SqlCommand(@"  select  ConfiguredValue    FROM [CCOps].[dbo].[SSIS Configurations]   where [PackagePath]='\Package.Connections[edw.finansbank.com.tr.A25318].Properties[Password]' and [ConfigurationFilter]='IVNEOD'", conn);
+            SqlCommand comm = new SqlCommand(@"  select  ConfiguredValue    FROM [CCOps].[dbo].[SSIS Configurations]   where [PackagePath]='\Package.Connections[edw].Properties[Password]' and [ConfigurationFilter]='IVNEOD'", conn);
             //Bağlantımı açıyorum.
             conn.Open();
             //SqlDataReader nesnem..
